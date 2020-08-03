@@ -27,11 +27,7 @@ else:
             else:
                 password = row[1]
                 salt = row[2]
-                #print(salt)
                 attempt = bcrypt.hashpw(password, salt)
-                #print(password.encode('utf-8'))
-                #print('\n')
-                #print(attempt.decode('utf-8'))
                 if not bcrypt.checkpw(password, attempt):
                     print('false')
                 else:
