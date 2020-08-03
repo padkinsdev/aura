@@ -3,7 +3,6 @@ import sys
 import bcrypt
 import sqlite3
 from os.path import isfile
-#import os
 
 args = sys.argv[1].split("&")
 #print(args)
@@ -19,7 +18,6 @@ else:
     if (not sanitize.sanitary(username) or not sanitize.sanitary(password)): # should the email field also be sanitized?
         print("illegal char")
     else:
-        #print(os.getcwd())
         salt = bcrypt.gensalt()
         hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
         #print(salt)
