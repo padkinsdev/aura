@@ -1,11 +1,8 @@
-//const errh = require('../utils/file_fetcher');
 const fs = require('fs');
 const { spawn } = require('child_process');
 const userpage = require('../utils/gen_file_page');
 const parseform = require('../utils/file_upload_parser');
-//const util = require('util');
 
-//var active_sessions = new Map();
 var session_start = new Map();
 
 function route(req, body){
@@ -16,7 +13,6 @@ function route(req, body){
         }
         switch(concat_path){
             case "/":
-                //console.log(req.headers);
                 if (req.headers.cookie != undefined){
                     if (req.headers.cookie.split('=')[0] == 'uname'){
                         let nowDate = new Date();
@@ -24,16 +20,12 @@ function route(req, body){
                             year: nowDate.getUTCFullYear(),
                             month: nowDate.getUTCMonth(),
                             day: nowDate.getUTCDate()
-                            //hour: nowDate.getUTCHours(),
-                            //minute: nowDate.getUTCMinutes()
                         }
                         const key = `${req.socket.remoteAddress}#${req.headers.cookie.split('=')[1]}`;
                         if (session_start.has(key)){
                             const last_login = session_start.get(key);
                             if (last_login.year != nowStr.year || last_login.month != nowStr.month || (last_login.month == nowStr.month && nowStr.day - last_login.day > 7)){
                                 session_start.delete(key);
-                                //active_sessions.delete(key);
-                                //console.log(3);
                                 resolve(new InternalResponse(200, fs.readFileSync('./pages/defined/index.html')));
                             } else {
                                 userpage.gen_files(key)
@@ -42,20 +34,16 @@ function route(req, body){
                                 });
                             }
                         } else {
-                            //console.log(1);
                             resolve(new InternalResponse(200, fs.readFileSync('./pages/defined/index.html')));
                         }
                     } else {
-                        //console.log(0);
                         resolve(new InternalResponse(200, fs.readFileSync('./pages/defined/index.html')));
                     }
                 } else {
-                    //console.log(2);
                     resolve(new InternalResponse(200, fs.readFileSync('./pages/defined/index.html')));
                 }
                 break;
             case "/upload":
-                //console.log(req.headers);
                 if (req.method != "POST" || req.headers.cookie == undefined){
                     resolve(new InternalResponse(400, fs.readFileSync('./pages/errors/400.html')));
                 } else if (req.headers.cookie.split('=')[0] != 'uname'){
@@ -68,8 +56,6 @@ function route(req, body){
                         let failed = [];
                         file_list.forEach((value) => {
                             if (value.err == "" && !(fs.existsSync(`./data/files/${foldername}/${value.filename}`))){
-                                //let fstream = fs.createWriteStream(`./data/files/${foldername}/${value.filename}`);
-                                //value.data.pipe(fstream)
                                 fs.writeFile(`./data/files/${foldername}/${value.filename}`, value.data, (err) => {
                                     if (err){
                                         console.log(`Error while saving file ${value.filename}: ${err}`);
@@ -102,12 +88,10 @@ function route(req, body){
                                             console.log(`Error when creating ./data/files/${foldername} directory:${err}`);
                                             resolve(new InternalResponse(500, "An internal server error occurred"));
                                         } else {
-                                            //console.log("1.1");
                                             savefiles(filearray);
                                         }
                                     });
                                 } else {
-                                    //console.log("1.2");
                                     savefiles(filearray);
                                 }
                             }
@@ -119,18 +103,13 @@ function route(req, body){
                                     console.log(`Error when creating ./data/files/${foldername} directory:${err}`);
                                     resolve(new InternalResponse(500, "An internal server error occurred"));
                                 } else {
-                                    //console.log("2.1");
                                     savefiles(filearray);
                                 }
                             });
                         } else {
-                            //console.log("2.2");
                             savefiles(filearray);
                         }
-                        //console.log(3);
-                        //savefiles(filearray);
                     }
-                    //resolve(new InternalResponse(200, "Upload success"));
                 }
                 break;
             case "/download":
@@ -150,7 +129,6 @@ function route(req, body){
                     let username = req.headers.cookie.split('=')[1];
                     let folder = `${req.socket.remoteAddress}#${username}`;
                     let filename = req.url.split('?')[1].split('=')[1].replace(/%20/g, " ");
-                    //console.log(`./data/files/${folder}/${filename}`);
                     if (!(fs.existsSync(`./data/files/${folder}/${filename}`))){
                         resolve(new InternalResponse(404, "The requested file was not found"));
                     } else {
@@ -172,8 +150,7 @@ function route(req, body){
                 resolve(new InternalResponse(200, fs.readFileSync('./pages/defined/register.html')));
                 break;
             case "/down_btn.png":
-                resolve(new InternalResponse(200, fs.readFileSync('./pages/defined/download.png'))); 
-                // stolen from https://github.com/signalapp/Signal-Android/blob/master/app/src/main/res/drawable-hdpi/ic_download_32.png
+                resolve(new InternalResponse(200, fs.readFileSync('./pages/defined/download.png')));
                 break;
             case "/confirm-registration":
                 if (req.method != "POST"){
@@ -191,7 +168,6 @@ function route(req, body){
                     });
                     registrator.on('close', (code) => {
                         data = Buffer.concat(data).toString().replace('\n', '');
-                        //console.log(`Register output:\n${data}`);
                         if (data == "success"){
                             console.warn("User is being redirected to https://localhost:8000/");
                             resolve(new InternalResponse(301, "You are being redirected", ["Location|https://localhost:8000"]));
@@ -241,25 +217,14 @@ function route(req, body){
                     });
                     authenticate.on('close', (code) => {
                         data = Buffer.concat(data).toString().replace('\n', '');
-                        //console.log("Auth output:\n" + data);
                         if (data == "true"){
                             username = body.split('&')[0].split('=')[1];
-                            //console.log(username);
-                            /*
-                            let id = Math.floor(Math.random()*100);
-                            while (active_sessions.has(`${req.socket.remoteAddress}/${id}`)){
-                                id = Math.floor(Math.random()*100);
-                            }
-                            */
                             let key = `${req.socket.remoteAddress}#${username}`;
-                            //active_sessions.set(key, username);
                             let nowDate = new Date();
                             let nowStr = {
                                 year: nowDate.getUTCFullYear(),
                                 month: nowDate.getUTCMonth(),
                                 day: nowDate.getUTCDate()
-                                //hour: nowDate.getUTCHours(),
-                                //minute: nowDate.getUTCMinutes()
                             }
                             session_start.set(key, nowStr);
                             nowDate.setTime(nowDate.getTime()+(30*24*60*60*1000)); // 30 days from now (is when the cookie should expire)
@@ -310,7 +275,6 @@ function route(req, body){
                                 console.log(`Error while attempting to delete file ./data/files/${folder}/${filename}`);
                                 resolve(new InternalResponse(500, "An internal server error occurred"));
                             } else {
-                                //console.log('Successfully deleted');
                                 resolve(new InternalResponse(200, "Successfully deleted"));
                             }
                         });
@@ -321,7 +285,6 @@ function route(req, body){
                 resolve(new InternalResponse(200, fs.readFileSync('./pages/errors/404.html')));
                 break;
         }
-        //reject("If you're getting this message, something is really, really wrong");
     });
 }
 
