@@ -1,7 +1,6 @@
 const https = require('https');
 const fs = require('fs');
 const router = require('./request_handling/req_route');
-//const formidable = require('formidable');
 
 const FORM_URLENCODED = 'application/x-www-form-urlencoded';
 
@@ -12,7 +11,6 @@ const options = {
 
 https.createServer(options, (req, res) => {
     if (req.headers['content-type'] == FORM_URLENCODED){
-        //if (req.url != "/upload"){
         let body = [];
         req.on('data', (chunk) => {
             body.push(chunk);
@@ -21,7 +19,6 @@ https.createServer(options, (req, res) => {
             body = Buffer.concat(body).toString();
             router.route(req, body)
             .then((result) => {
-                //console.log(`Code ${result.code} and data ${result.data}`);
                 res.statusCode = result.code;
                 if (result.headers != "none"){
                     result.headers.forEach(element => {
@@ -42,17 +39,9 @@ https.createServer(options, (req, res) => {
                 })
             });
         });
-        /*} else {
-            const form = new formidable.IncomingForm();
-            form.parse(req, (err, fields, files) => {
-                console.log(typeof files);
-                console.log(typeof fields);
-            });
-        }*/
     } else {
         router.route(req)
         .then((result) => {
-            //console.log(`Code ${result.code} and data ${result.data}`);
             res.statusCode = result.code;
             if (result.headers != "none"){
                 result.headers.forEach(element => {
