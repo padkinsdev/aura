@@ -34,7 +34,7 @@ Clone or [download](https://github.com/padkinsdev/aura/archive/master.zip) the r
 
 ### Known Issues
 * I have noticed that the server sometimes has issues with avoiding username collisions.
-* The application is currently only able to successfully save text and related files. When I have tried to upload and then download .png and .pdf files, I have found that the file comes out corrupted. I highly suspect that this has something to do with the way that files are encoded when they are saved by the server through [/utils/file_upload_parser.js](https://github.com/padkinsdev/aura/utils/file_upload_parser.js), but if anyone knows of a solution, please reach out to me or submit a pull request.
+* The application is currently only able to successfully save text and related files. When I have tried to upload and then download .png and .pdf files, I have found that the files come out corrupted. I highly suspect that this has something to do with the way that files are encoded when they are saved by the server through [/utils/file_upload_parser.js](https://github.com/padkinsdev/aura/blob/master/utils/file_upload_parser.js), but if anyone knows of a solution, please reach out to me or submit a pull request.
 
 ### Contributing
 Pull requests and bug reports are welcome. Please provide as much explanation and/or documentation for your code/issue as possible.
