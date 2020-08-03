@@ -1,6 +1,6 @@
 language: node_js
 node_js:
   - 12
-install: pip install bcrypt
+install: pip3 install bcrypt
 script: npm start
 os: osx
