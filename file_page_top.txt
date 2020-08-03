@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width"/>
+        <title>Files</title>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=DM+Sans&display=swap">
+        <style>
+            body {
+                font-family: 'DM Sans', serif;
+                font-size: 24px;
+            }
+            .topbar {
+                background-color: black;
+                width: 0;
+                overflow: hidden;
+                transition: 1s;
+            }
+            .topbar a {
+                float: left;
+                text-align: center;
+                color: white;
+                text-decoration: none;
+                font-size: large;
+                padding: 10px 10px;
+            }
+            .topbar a:hover {
+                background-color: gray;
+            }
+            .file-entry {
+                font-size: medium;
+            }
+            td {
+                font-size: 20px;
+                border-bottom: 2px solid gray;
+                padding: 5px;
+                text-align: center;
+            }
+            table {
+                transition: 2s;
+                width: 0;
+                background-color: lightgreen;
+            }
+            .download-icon {
+                width: 20px;
+                height: 20px;
+            }
+            .dl-cell {
+                width: 30px;
+            }
+            .trash-icon {
+                height: 20px;
+            }
+            .trash {
+                width: 30px
+            }
+            .notifications {
+                font-size: 15px;
+                position: fixed;
+                width: 0px;
+                opacity: 0;
+                transition: opacity 1s;
+                bottom: 0px;
+                background-color: rgb(253, 109, 109);
+            }
+        </style>
+        <script>
+            function animate_top(){
+                document.getElementById("main-links").style.width = (document.documentElement.clientWidth - 16) + "px";
+                //document.getElementById("main-links").style.height = "40px";
+                document.getElementById("file-table").style.width = (document.documentElement.clientWidth - 16) + "px";
+                // grab cookie id
+                /*
+                fetch('./get-new-cookie-id')
+                .then(function(response){
+                    document.cookie = 
+                });
+                */
+            }
+            function create_alert(text, timeout){
+                document.getElementById("notif-box").style.opacity = 1;
+                document.getElementById("notif-box").style.width = (document.documentElement.clientWidth - 16) + 'px';
+                document.getElementById("alert-msg").innerText = text;
+                setTimeout(function(){
+                    document.getElementById("notif-box").style.opacity = 0;
+                    setTimeout(function(){
+                        document.getElementById("alert-msg").innerText = '';
+                        document.getElementById("notif-box").style.width = '0px';
+                    }, 1000);
+                }, timeout);
+            }
+            function deleteFile(filename){
+                fetch('./delete-file?file=' + filename)
+                .then(function(response){
+                    if (response.status != 200){
+                        throw "Server returned non-200 response for delete request: "+response.status;
+                    } else {
+                        location.reload();
+                    }
+                })
+                .catch(function(reason){
+                    console.error('Error during delete request:' + reason);
+                    create_alert("An error occurred while deleting the specified file", 3000);
+                });
+            }
+            function download(filename){
+                fetch('./download?file=' + filename)
+                .then(function(response){
+                    if (response.status != 200) {
+                        //console.log('ERR: Server response to request for ' + filename + ' was code ' + response.status);
+                        throw "Server returned non-200 response code"
+                        //create_alert("There was an error with your download", 2000);
+                        //return;
+                    }
+                    return response.text();
+                })
+                .then((body) => {
+                    const a = document.createElement("a");
+                    a.style.display = "none";
+                    document.body.appendChild(a);
+                    a.href = window.URL.createObjectURL(
+                        new Blob([body])
+                    );
+                    a.setAttribute("download", filename);
+                    a.click();
+                    window.URL.revokeObjectURL(a.href);
+                    document.body.removeChild(a);
+                })
+                .catch(
+                    function(err){
+                        console.log("ERR: Error during fetch: " + err);
+                        create_alert("There was an error with your download", 2000);
+                    }
+                );
+            }
+            function dragDrop(event){
+                if (event.type == "dragenter" || event.type == "dragover"){
+                    //change appearance for drag & drop area?
+                    event.stopPropagation();
+                    event.preventDefault();
+                } else if (event.type == "drop"){
+                    event.stopPropagation();
+                    event.preventDefault();
+                    const files = event.dataTransfer.files;
+                    if (files.length > 0){
+                        uploadAll(files);
+                    }
+                }
+            }
+            function uploadPOST(file){
+                return new Promise(function(resolve_out){
+                    const form = new FormData();
+                    form.append(file.name, file);
+                    fetch("./upload", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: form
+                    })
+                    .then((response) => {
+                        if (!(response.ok)){
+                            throw "Server returned status code "+response.status;
+                        }
+                        return response.body.toString()
+                    })
+                    .then(function(body){
+                        console.log("Successfully uploaded file "+file.name+":\n"+body);
+                        resolve_out("success");
+                        //location.reload();
+                    })
+                    .catch(function(response){
+                        console.error("Failed to upload file "+file.name+":\n"+response);
+                        resolve_out("fail");
+                    });
+                });
+            }
+            function uploadAll(files){
+                var success = [];
+                var failed = [];
+                var file;
+                for (var i=0; i<files.length; i++){
+                    file = files.item(i);
+                    uploadPOST(file)
+                    .then(function(result){
+                        if (result == "success"){
+                            success.push(file.name);
+                        } else {
+                            failed.push(file.name);
+                        }
+                    })
+                    .then(function(){
+                        if (failed.length > 0){
+                            create_alert("Failed to upload the following files: "+failed.join(", "), 2000+failed.length*1000);
+                        } else {
+                            location.reload();
+                        }
+                    })
+                    .catch(function(result){
+                        console.error("Iteration through list of files to be uploaded failed:\n"+result);
+                    });
+                }
+            }
+        </script>
+    </head>
+    <body onload="animate_top()">
+        <div class="notifications" id="notif-box">
+            <p id="alert-msg" style="padding-left: 10px;"></p>
+        </div>
+        <div class="topbar" id="main-links">
+            <input type="file" id="uploader" style="display: none;" multiple>
+            <a id="file-selector">Upload</a>
+            <a href="./logout">Log Out</a>
+            <script>
+                const fileSelector = document.getElementById('file-selector');
+                const uploader = document.getElementById('uploader');
+                fileSelector.addEventListener('click', function(){
+                    if (uploader){
+                        uploader.click();
+                    } else {
+                        console.warn('Could not locate file uploader in webpage body');
+                    }
+                }, false);
+                uploader.addEventListener('change', function(){
+                    if (uploader.files.length > 0){
+                        var message = "Are you sure you want to upload the following file(s)?: ";
+                        for (var i=0; i<uploader.files.length-1; i++){
+                            message = message + uploader.files.item(i).name + ", ";
+                        }
+                        message = message + uploader.files.item(uploader.files.length-1).name;
+                        var confirmation = window.confirm(message);
+                        if (confirmation){
+                            uploadAll(uploader.files);
+                        }
+                    }
+                }, false);
+            </script>
+        </div>
+        <div id="file-list">
+            <script>
+                var droparea = document.getElementById('file-list');
+                if (droparea){
+                    droparea.addEventListener("dragenter", dragDrop, false);
+                    droparea.addEventListener("dragover", dragDrop, false);
+                    droparea.addEventListener("drop", dragDrop, false);
+                }
+            </script>
+            <table id="file-table">

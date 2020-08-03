@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width"/>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=DM+Sans&display=swap">
+        <title>Create Account</title>
+        <base href="https://localhost:8000/"> <!--Change this before production!!!-->
+        <style>
+            body {
+                font-family: 'DM Sans', serif;
+                text-align: center;
+            }
+            h3 {
+                color: #221f1f;
+            }
+            .register-frame {
+                background-color: rgb(226, 43, 226);
+                display: inline-block;
+                padding: 30px 50px;
+            }
+            a {
+                text-decoration: none;
+                background-color: black;
+                color: white;
+                font-size: 15px;
+            }
+            .alert-box {
+                font-size: 15px;
+                position: fixed;
+                width: 0px;
+                opacity: 0;
+                transition: opacity 1s;
+                bottom: 0px;
+                background-color: rgb(253, 109, 109);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="register-frame">
+            <h3>Register</h3>
+            <form action="/confirm-registration" method="POST">
+                <label for="username">Username:</label><br>
+                <input type="text" id="username" name="uname" onchange="checkUname()" autocomplete="username"><br>
+                <label for="password">Password:</label><br>
+                <input type="password" id="password" name="pword" onchange="checkPword()" autocomplete="new-password"><br>
+                <label for="email">Email Address:</label><br>
+                <input type="email" id="email" name="email" onchange="checkMail()" autocomplete="email"><br><br>
+                <input type="hidden" value="Submit" id="submit-btn">
+            </form>
+            <br><br>
+            <a href="">Log In</a>
+        </div>
+        <div class="alert-box" id="notif-box">
+            <p id="message"></p>
+        </div>
+        <script>
+            var goodUname = false;
+            var goodPass = false;
+            var goodMail = false;
+            var notifActive = false;
+
+            function checkUname(){
+                var curName = document.getElementById("username").value;
+                if (!sanitize(curName, "username")){
+                    return false;
+                }
+                fetch(`/check-name?uname=${curName}`).then(function(response){
+                    if (response.status !== 200){
+                        return false;
+                    }
+                    return response.text();
+                }).then(function(response){
+                    console.log(response);
+                    if (response == "false"){
+                        goodUname = true;
+                    } else {
+                        create_alert("That username is already taken", 3000)
+                    }
+                });
+                revealSubmit();
+            }
+
+            function checkPword(){
+                var curPass = document.getElementById("password").value;
+                if (!sanitize(curPass, "password")){
+                    return false;
+                }
+                if (curPass.length >= 8){
+                    goodPass = true;
+                } else {
+                    create_alert("Password must be at least 8 characters long", 3000);
+                }
+                revealSubmit();
+            }
+
+            function sanitize(input, fieldName){
+                var forbidden = ["?", "&", "\\", "'", "|", ";"];
+                for (const char of forbidden){
+                    if (input.includes(char)){
+                        create_alert("The " + fieldName + " field can't contain the " + char + " character", 2000);
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            function checkMail(){
+                var curMail = document.getElementById("email").value;
+                var atSymbLoc = curMail.indexOf("@");
+                var dotLoc = curMail.indexOf(".", atSymbLoc);
+                if (!sanitize(curMail, "email")){
+                    return false;
+                }
+                if (atSymbLoc < 0 || dotLoc < 0 || dotLoc >= curMail.length-1){
+                    goodMail = false;
+                    create_alert("Not a valid email address", 2000);
+                } else {
+                    goodMail = true;
+                }
+                revealSubmit();
+            }
+
+            function create_alert(text, timeout){
+                if (!notifActive){
+                    notifActive = true;
+                    document.getElementById("notif-box").style.opacity = 1;
+                    document.getElementById("notif-box").style.width = (document.documentElement.clientWidth - 16) + 'px';
+                    document.getElementById("message").innerText = text;
+                    setTimeout(function(){
+                        document.getElementById("notif-box").style.opacity = 0;
+                        setTimeout(function(){
+                            notifActive = false;
+                            document.getElementById("message").innerText = '';
+                            document.getElementById("notif-box").style.width = '0px';
+                        }, 1000);
+                    }, timeout);
+                } else {
+                    document.getElementById("message").innerText = text;
+                }
+            }
+
+            function revealSubmit(){
+                if (goodUname && goodPass && goodMail){
+                    document.getElementById("submit-btn").type = 'submit';
+                }
+            }
+        </script>
+    </body>
+</html>

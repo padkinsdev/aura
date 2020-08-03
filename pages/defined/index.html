@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width"/>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=DM+Sans&display=swap">
+        <title>Sign In</title>
+        <style>
+            body {
+                font-family: 'DM Sans', serif;
+                text-align: center;
+            }
+            h3 {
+                color: #424242;
+            }
+            .sign-in-frame {
+                background-color: lightcoral;
+                display: inline-block;
+                padding: 30px 50px;
+            }
+            a {
+                text-decoration: none;
+                background-color: black;
+                color: white;
+                font-size: 15px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="sign-in-frame">
+            <h3 >Please log in</h3>
+            <form action="/authenticate" method="POST">
+                <label for="fname">Username:</label><br>
+                <input type="text" id="username" name="uname" autocomplete="username"><br>
+                <label for="lname">Password:</label><br>
+                <input type="password" id="password" name="pword" autocomplete="current-password"><br><br>
+                <input type="submit" value="Submit">
+            </form>
+            <br><br>
+            <a href="/register">Sign Up</a>
+        </div>
+    </body>
+</html>
