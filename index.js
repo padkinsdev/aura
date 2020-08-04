@@ -3,6 +3,9 @@ const http = require('http');
 const fs = require('fs');
 const router = require('./request_handling/req_route');
 
+const hostname = require('os').hostname();
+console.log(hostname);
+
 const FORM_URLENCODED = 'application/x-www-form-urlencoded';
 
 function downloadFile(url, fpath){ 
