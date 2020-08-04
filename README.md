@@ -2,6 +2,7 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/4bab878fa1274cf7ae309481e5049c67)](https://app.codacy.com/manual/padkinsdev/aura?utm_source=github.com&utm_medium=referral&utm_content=padkinsdev/aura&utm_campaign=Badge_Grade_Dashboard)
 [![CodeFactor](https://www.codefactor.io/repository/github/padkinsdev/aura/badge)](https://www.codefactor.io/repository/github/padkinsdev/aura)
+[![Build Status](https://travis-ci.com/padkinsdev/aura.svg?branch=master)](https://travis-ci.com/padkinsdev/aura)
 
 ### Table of Contents
 * [Introduction](#introduction)
