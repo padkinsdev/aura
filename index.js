@@ -90,7 +90,7 @@ downloadFile(process.env.key_url, './key.pem')
                 })
             });
         }
-    }).listen(8000, '100.15.85.130');    
+    }).listen(8000);    
 })
 .catch((reason) => {
     console.error(reason);
