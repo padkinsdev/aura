@@ -3,9 +3,6 @@ const http = require('http');
 const fs = require('fs');
 const router = require('./request_handling/req_route');
 
-const hostname = require('os').hostname();
-console.log(hostname);
-
 const FORM_URLENCODED = 'application/x-www-form-urlencoded';
 
 function downloadFile(url, fpath){ 
@@ -93,7 +90,7 @@ downloadFile(process.env.key_url, './key.pem')
                 })
             });
         }
-    }).listen(8000, hostname);    
+    }).listen(8000, '100.15.85.130');    
 })
 .catch((reason) => {
     console.error(reason);
